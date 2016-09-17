@@ -1,0 +1,93 @@
+<template>
+  <require from="materialize-css/css/materialize.css"></require>
+  <require from="./resources/css/default.css"></require>
+  <md-navbar>
+    <a route-href="route: eve-sso" class="brand-logo" css.bind="{paddingRight: '15px', paddingLeft: '15px'}"><span>CorpWeb</span></a>
+    <ul class="hide-on-med-and-down right">
+      <li repeat.for="route of router.navigation" show.bind="nav.bar[route.title]" class="${route.isActive ? 'active' : ''}">
+        <a href="${route.href}">${route.title}</a>
+      </li>
+      <li css.bind="{paddingRight: '15px', paddingLeft: '15px'}">Status: ${socket.state}</li>
+      <li>
+        <a show.bind="socket.state !== 'Reconnecting'" md-button click.trigger="connection()">
+          ${socket.action}
+        </a>
+        <a show.bind="socket.state === 'Reconnecting'" md-button="disabled: true">
+          ${socket.action}
+        </a>
+      </li>
+      <li show.bind="socket.info && socket.info.user_id === null">
+        <a md-button="disabled: true">Logging In...</a>
+      </li>
+      <li show.bind="socket.info && socket.info.user_id != null && socket.info.character_name && socket.state == 'Connected'">
+        <a md-sidenav-collapse="ref.bind: sideNavRight" md-button>${socket.info.character_name}</a>
+      </li>
+      <li show.bind="socket.info && socket.info.user_id != null && socket.info.character_name && socket.state != 'Connected'">
+        <a md-button="disabled: true">${socket.info.character_name}</a>
+      </li>
+      <li show.bind="!(socket.info && socket.info.character_name) && socket.info.user_id !== null">
+        <a href="${socket.state == 'Connected' ? site_config.backend.uri + site_config.backend.eve_sso_redirect : '#' }" md-button="disabled.bind: socket.state !== 'Connected'">Log In</a>
+      </li>
+    </ul>
+  </md-navbar>
+  <md-sidenav show.bind='socket.info.character_id' md-width="320" view-model.ref="sideNavRight" md-edge="right" md-close-on-click="true">
+    <img  css.bind='{padding: "32px"}' src="https://imageserver.eveonline.com/Character/${socket.info.character_id}_256.jpg" alt="Character Portrait">
+    <ul>
+      <li><a class="subheader">Info</a></li>
+      <li><a>ID: ${socket.info.character_id}</a></li>
+      <li><a>${socket.info.character_name}</a></li>
+      <li><a class="subheader">Affiliation</a></li>
+      <li><a>${socket.info.corporation_name}</a></li>
+      <li><a>${socket.info.alliance_name}</a></li>
+      <li show.bind="socket.has_groups" ><a class="subheader">Auth Groups</a></li>
+      <li repeat.for="group of socket.info.auth_groups"><a>${group}</a></li>
+      <li show.bind="socket.has_groups" ><a class="subheader">Calculated Permissions</a></li>
+      <li repeat.for="[permission, calculation] of socket.info.permissions"><a>${permission} : ${calculation}</a></li>
+      <li><a class="subheader">Actions</a></li>
+      <li><a click.trigger="associated()" md-modal-trigger href="#list-associated">List Associated Characters</a></li>
+      <li show.bind="!changefeeds.associating"><a md-modal-trigger href="#confirm-association">Associate new character</a></li>
+      <li css.bind='{padding: "32px"}' show.bind="changefeeds.associating">
+        <md-progress md-type="circular" md-color="flashing"></md-progress>
+        <p>Association in progress...</p>
+      </li>
+      <li><a click.trigger="logout()">Log Out</a></li>
+    </ul>
+  </md-sidenav>
+  <div id="confirm-association" class="modal">
+    <div class="modal-content">
+      <h4>Associate Character with ${socket.info.character_name}</h4>
+      <p>You are currently logged in as <b>${socket.info.character_name}</b>.</p>
+      <p>Ensure you want to link a new character with THIS account.</p>
+      <p><strong>Only admins will be able to revert this change.</strong></p>
+    </div>
+    <div class="modal-footer">
+      <a href="${site_config.backend.uri + site_config.backend.eve_sso_redirect}" md-button="flat: true;" class="modal-action modal-close">Continue</a>
+      <a md-button="flat: true;" class="modal-action modal-close">Cancel</a>
+    </div>
+  </div>
+  <div id="list-associated" class="modal">
+    <div class="modal-content">
+      <h4>Associated Characters</h4>
+      <table class="striped responsive-table">
+        <thead>
+        <tr>
+          <th data-field="character_name">Character Name</th>
+          <th data-field="corporation_name">Corporation Name</th>
+          <th data-field="alliance_name">Alliance Name</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr repeat.for="character of changefeeds.associated_characters">
+          <td>${character.character_name}</td>
+          <td>${character.corporation_name}</td>
+          <td>${character.alliance_name}</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="modal-footer">
+      <a md-button="flat: true;" class="modal-action modal-close">Cancel</a>
+    </div>
+  </div>
+  <router-view></router-view>
+</template>

@@ -1,0 +1,249 @@
+<template>
+  <div class="container">
+    <div class="row">
+      <h1 class="center-align">Welcome to CorpWeb</h1>
+      <h3 class="center-align">CorpWeb ${quote}</h3>
+      <div class="col m8 offset-m2">
+        <md-card md-horizontal="true" md-image="https://imageserver.eveonline.com/Character/93256039_256.jpg">
+          <div>
+            Welcome to CorpWeb (or TIT's Dashboard 2.0).
+            <br />
+            If you are wondering why I've deprecated the old site, keep reading.
+            <br />
+            Otherwise, move along. Nothing to see here.
+            <br />
+            <br />
+            If you have any questions, you can always ping me on discord.
+            <br />
+            <br />
+            <b>This part will be later moved to an "about" page.</b>
+          </div>
+        </md-card>
+      </div>
+    </div>
+    <div class="row">
+      <h2 class="center-align">Questions of the Curious</h2>
+      <ul md-collapsible="accordion: true; popout: true;">
+        <li>
+          <div class="collapsible-header">
+            <i class="mdi-image-filter-drama"></i>
+            Why recreate the dashboard? [Click Here]
+          </div>
+          <div class="collapsible-body">
+            <p>
+              A lot of reasons actually, but it all came down to doing more maintenance than actual feature development.
+              <br />
+              <br />
+              The dashboard was going pretty well, until I was requested to add discord integration,
+              routinely checked APIs, and other asynchronous jobs. I had built the dashboard on the premise that it would
+              be simple, there would be a "trigger" for all events, and everything could be done synchronously.
+              Unfortunately, that is not what was going to be needed.
+              <br />
+              <br />
+              When I needed to add discord integration, that part was async only. So I had to forcibly "monkey-patch" in
+              a way to use the synchronous dashboard with the asynchronous discord bot. This worked "well", except I now
+              had the overhead of the new redis instance. I then tried to add on celery on top of that redis instance so
+              I could support message queues and routine tasks like api checks. This was ok too, but even small
+              adjustments to celery would break the stack. Final nail in the coffin was when marketeers would get
+              multiple pings in a row for the same order.
+              <b>Still to this day, I still don't understand why this was</b>
+              <br />
+              <br />
+              Being the sole developer and hating the asynchronous code I cobbled together into a synchronous system,
+              I took a break for a couple of months. Eventually, I got bored while I was deployed in Taiwan,
+              and went back to what I liked best: coding with new technologies and creating features instead of
+              doing overbearing maintenance. Don't get me wrong. I do maintenance when needed, but doing it all the time
+              by myself without being able to find the root cause was painful.
+              <br />
+              <br />
+              The "Idea"(c) is to create the dashboard again from the ground up, assuming everything will be
+              asynchronous. In fact, this was one of the design focuses for Node.js when it was created.
+              <b>Focus on support for real-time applications</b>
+            </p>
+          </div>
+        </li>
+        <li>
+          <div class="collapsible-header">
+            <i class="mdi-image-filter-drama"></i>
+            Does this mean we'll have to do this all over again at a moments whim?
+          </div>
+          <div class="collapsible-body">
+            <p>
+              If I was being overly serious and cynical, I'd say <b>yes</b>. This is what you get when you have
+              a single developer who does this FOR FUN (weird, I know). You can't expect me to give this Long-Time Support
+              and I have been known by many to be fickle and never buy-in to any of my development projects. I'm doing this
+              for fun, and once it starts feeling like work, I'll stop. I work as a test engineer who has to debug
+              assembly or program problems and do maintenance at work already. I don't need two times the headache.
+              <br />
+              <br />
+              If I was being realistic about it, i'd say hopefully not. I'll do my best to prevent having to rebuild
+              the entire dashboard all over again, but being the sole developer for as "large" as a project as this
+              is, while fun, kind of rough. In fact, I built the stack in javascript hoping there would be SOMEONE who was
+              interested in helping. As Javascript is the only language you can use in a browser, web developers should
+              be familiar with it.
+              <br />
+              <br />
+              Using the over-cliche type of deal, I put a lot of time and effort because I find it fun. If I can use my
+              enjoyment to make the everyone in the corporation lives easier, then it is my honor.
+              <br />
+              <br />
+              <b>
+                Please help out by taking a couple minutes of your time to click some buttons. As always, I try to make
+                it as easy as possible to use so that the pain is minimal.
+              </b>
+            </p>
+          </div>
+        </li>
+        <li>
+          <div class="collapsible-header">
+            <i class="mdi-image-filter-drama"></i>
+            Did you just say APIs are dead?
+          </div>
+          <div class="collapsible-body">
+            <p>
+              Yes. You heard me right. <b>APIs are dead.</b>
+              <br />
+              <br />
+              APIs have always been a thorn in my side. They can expire, other sites can steal them, people don't
+              remember which APIs correspond to different groups, people use APIs in more than one place,
+              what is a "full" API changes when CCP adds extra scopes, getting an API is "too challenging"...
+              <br />
+              <b>Enter CREST</b>
+              <br />
+              <br />
+              Now that crest (SSO) authentications can access the XML api, the old API system is no longer needed.
+              People don't have to go through a complicated process to create them, you don't have to ensure the API is
+              not expired, and sites can't use other site's CREST authentication. If I need a new set of permissions
+              from you, I'll just get it when you click that "Log In" button again.
+              <br />
+              <br />
+              "That's great and all, but I don't care about developers. What does this mean for me?". Well for starters,
+              you don't have to create an API. Literally click the dashboards "Log In" button, sign in, choose a character,
+              and click authorize. This is as simple as it gets.
+              <b>If you can't even do that, I don't understand how you even sign in to EVE.</b>
+              <br />
+              <br />
+              Here's a caveat though. CCP decided that you cannot submit a "full account" CREST auth. This means you will
+              need to click a couple of buttons for EVERY character that you own. I get it. It's pretty annoying if you
+              have 8 full accounts. At least you don't have to go sign in, create the correct API key, sign out, sign in
+              with the next one, create another correct API key, sign out... you get the picture.
+            </p>
+          </div>
+        </li>
+        <li>
+          <div class="collapsible-header">
+            <i class="mdi-image-filter-drama"></i>
+            What about migrations?
+          </div>
+          <div class="collapsible-body">
+            <p>
+              ...this one is a little painful. Long story short, I hope to be able to get the discord auth associations
+              and be able to tie your new dashboard accounts with your old forum accounts. If not, you won't be able to
+              edit your old responses on the dashboard (data will definitely still be there) and I'll need to force
+              everyone to update their discord associations on first log-in.
+              <br />
+              <br />
+              The discord API, being an annoying piece of "unappetising food", I wouldn't be surprised if I couldn't migrate
+              that. Discord integration will hopefully be deployed in the near future, but not immediately. I would just
+              like to say that it will be much easier for me this time around though.
+            </p>
+          </div>
+        </li>
+      </ul>
+    </div>
+    <div class="row">
+      <h2 class="center-align">Technologies Used</h2>
+    </div>
+    <div class="row">
+      <div class="col m3">
+        <md-card md-image="static/img/tech/aurelia.jpg">
+          <h5>Frontend Driver</h5>
+          <h5>Aurelia</h5>
+          <h6>Comparable to Angular 2</h6>
+          <div>
+            The real-time framework that makes the frontend possible.
+            All the text changes and code that drives the backend is built on top of aurelia.
+          </div>
+        </md-card>
+      </div>
+      <div class="col m3">
+        <md-card md-image="static/img/tech/materialize.jpg">
+          <h5>Frontend Styling</h5>
+          <h5>Materialize</h5>
+          <h6>Comparable to Bootstrap</h6>
+          <div>
+            Materialize is a new type of CSS framework that is more friendly to web frameworks than bootstrap.
+          </div>
+        </md-card>
+      </div>
+      <div class="col m3">
+        <md-card md-image="static/img/tech/websockets.jpg">
+          <h5>Technology Communication</h5>
+          <h5>Websockets</h5>
+          <h6>Comparable to AJAX</h6>
+          <div>
+            Websockets is just how it sounds like. Allows for socket transmissions with the browser.
+          </div>
+        </md-card>
+      </div>
+      <div class="col m3">
+        <md-card md-image="static/img/tech/es6.jpg">
+          <h5>Technology Language</h5>
+          <h5>Javascript ES6/2015</h5>
+          <h6>Comparable to Python (if python worked in a browser)</h6>
+          <div>
+            Nothing new here. It's still the only language you can use in a browser.
+            All technologies (minus deployment) are used by writing Javascript.
+            ES6 is the newest "type" of javascript.
+          </div>
+        </md-card>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col m3">
+        <md-card md-image="static/img/tech/nodejs.jpg">
+          <h5>Backend Driver</h5>
+          <h5>Node.js</h5>
+          <h6>Comparable to Flask (kind of)</h6>
+          <div>
+            Node.js is basically a server-side implementation of javascript.
+            Combination of express makes it comparable to flask or sinatra.
+            Allows for asynchronous processes.
+          </div>
+        </md-card>
+      </div>
+      <div class="col m3">
+        <md-card md-image="static/img/tech/rethinkdb.jpg">
+          <h5>Backend Database</h5>
+          <h5>RethinkDB</h5>
+          <h6>Comparable to MongoDB</h6>
+          <div>
+            One of the newest NoSQL databases.
+            The query lanugage is much nicer than MongoDB in my opinion.
+          </div>
+        </md-card>
+      </div>
+      <div class="col m3">
+        <md-card md-image="static/img/tech/ansible.jpg">
+          <h5>Deployment Automation</h5>
+          <h5>Ansible</h5>
+          <div>
+            Used for deploying and updating the new virtual machine.
+            Before, I used a lot of custom scripts that needed to be maintained.
+            This is a "standardized" way of automating my deployment steps.
+          </div>
+        </md-card>
+      </div>
+      <div class="col m3">
+        <md-card md-image="static/img/tech/docker.jpg">
+          <h5>Deployment Encapsulation</h5>
+          <h5>Docker</h5>
+          <div>
+            Docker is almost like having a virtual machine in a virtual machine.
+            Allows for rapid removal and deployment of applications.
+          </div>
+        </md-card>
+      </div>
+    </div>
+  </div>
+</template>

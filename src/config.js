@@ -1,3 +1,5 @@
+// WARNING: Replaced by template in CorpWebAnsible
+
 const config = {
   backend: {
     uri: "http://api.corpweb.com",  //"http://localhost:3000",  // Hard-coded in. Needs template

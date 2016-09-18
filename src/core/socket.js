@@ -25,8 +25,9 @@ export default class Socket {
     this.connection_uri = config.backend.uri;
     this.connection = Primus.connect(config.backend.uri);
     this.initialize();
-    this.state = "Unknown";
-    this.action = "None";
+    // Default to reconnecting
+    this.state = "Reconnecting";
+    this.action = "Reconnecting...";
     this.reconnect = {seconds: 0, attempt: 0, max: 0};
     this.latest_data = null;
 

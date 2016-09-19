@@ -18,7 +18,9 @@ export class App {
     this.changefeeds = Changefeeds;
 
     this.changefeeds.attach_toast(Toast);
-    this.socket.send("auth", "user.characters", this.socket.info.user_id);
+    if (this.socket.info.user_id){
+      this.socket.send("auth", "user.characters", this.socket.info.user_id);
+    }
 
   }
 

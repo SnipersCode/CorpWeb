@@ -8,7 +8,6 @@ COPY materialize-css /data/www/materialize-css/
 COPY index.html /data/www/
 
 COPY scripts/app-bundle.js /data/www/scripts/
-COPY scripts/app-bundle.js.map /data/www/scripts/
 
 COPY static /data/www/static/
 

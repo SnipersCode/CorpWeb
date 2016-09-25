@@ -52,7 +52,7 @@
     "vinyl-fs": "^2.4.3"
   },
   "optionalDependencies": {
-    "aurelia-materialize-bridge": "^0.16.0",
+    "aurelia-materialize-bridge": "^0.17.0",
     "aurelia-validation": "^0.12.5"
   }
 }

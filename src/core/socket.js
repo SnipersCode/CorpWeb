@@ -24,12 +24,12 @@ export default class Socket {
 
     this.connection_uri = config.backend.uri;
     this.connection = Primus.connect(config.backend.uri);
-    this.initialize();
     // Default to reconnecting
     this.state = "Reconnecting";
     this.action = "Reconnecting...";
     this.reconnect = {seconds: 0, attempt: 0, max: 0};
     this.latest_data = null;
+    this.external_listeners = {};
 
     this.changefeeds = Changefeeds;
     this.changefeeds.attach_socket(this);
@@ -49,6 +49,7 @@ export default class Socket {
       }
 
     }).on('open', () => {
+      this.initialize();
       this.state = "Connected";
       this.action = "Disconnect";
     }).on('end', () => {
@@ -60,6 +61,7 @@ export default class Socket {
       this.action = "Reconnecting...";
       this.reconnect = {seconds: opts.scheduled, attempt: opts.attempt, max: opts.retries};
     }).on('reconnected', () => {
+      this.initialize();
       this.state = "Connected";
       this.action = "Disconnect";
     });
@@ -130,11 +132,16 @@ export default class Socket {
   }
 
   subscribe(module, endpoint, callback) {
-    this.connection.addListener('data', (data) => {
+    this.external_listeners[module + endpoint] = (data) => {
       if (!module || (data.module == module && !endpoint) || (data.module == module && data.endpoint == endpoint)){
         callback(data.payload);
       }
-    });
+    };
+    this.connection.addListener('data', this.external_listeners[module + endpoint]);
+  }
+
+  unsubscribe(module, endpoint) {
+    this.connection.removeListener('data', this.external_listeners[module + endpoint]);
   }
 
   get direct_state() {

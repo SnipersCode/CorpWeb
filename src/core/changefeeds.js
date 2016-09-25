@@ -9,41 +9,14 @@ export default class Changefeeds {
     // Fake settings
     this.srp_rules = {
       standard: new Map([
-        [5, 1],      // T1 Frigate
-        [1362, .5],  // Faction Frigate
-        [1364, 1],   // T2 Frigate
-
-        [464, 1],    // T1 Destroyer
-        [1373, .5],  // T2 Destroyer
-
-        [6, 1],      // T1 Cruiser
-        [1369, .5],  // Faction Cruiser
-        [1368, .5],  // T2 Cruiser
-
-        [469, .5],   // T1 Battlecruiser
-        [1703, .5],  // Faction Battlecruiser
-        [1375, .5],  // T2 Battlecruiser
-
-        [7, .5],     // T1 Battleship
-        [1378, .5],  // Faction Battleship
-        [1377, .5],  // T2 Battleship
-
-        [8, 0],      // T1 Industrial Ship
-        [1385, 0],   // T2 Industrial Ship
-
-        [761, 0],    // Capital: Dreadnought
-        [766, 0],    // Capital: Freighter
-        [812, 0],    // Capital: Titan
-        [817, 0],    // Capital: Carriers
-        [1047, 0],   // Capital: Capital Industrial Ships
-        [1089, 0],   // Capital: Jump Freighters
-        [2271, 0],   // Capital: Force Auxiliaries
-
         [null, 0]    // Default
-      ]),
-      fc: new Map([[null, 1]]),
-      solo: new Map([[null, 0.4]])
-    }
+      ])
+    };
+    this.srp_types = [];
+
+    // External references. There's probably a better way to implement this
+    this.references = {};
+
   }
 
   attach_toast(toast_service){
@@ -51,6 +24,18 @@ export default class Changefeeds {
   }
 
   attach_socket(socket) {
+
+    const lossmail_adjust = (data) => {
+      data.forEach((killmail) => {
+        this.lossmails_all.set(killmail.id, killmail);
+      });
+      // Reorder
+      // Careful! Babel might be messing with spread (...) syntax.
+      // This is NOT equivalent to [...this.lossmails_all] or Array.from([...this.lossmails_all])
+      this.lossmails_all = new Map(Array.from(this.lossmails_all.entries()).sort(
+        (a,b) => new Date(b[1].kill_time) - new Date(a[1].kill_time)))
+    };
+
     socket.subscribe("auth", "user.characters", (data) => {
       this.associated_characters = data;
     });
@@ -62,15 +47,18 @@ export default class Changefeeds {
       this.associating = false;
       this.display(`${data} successfully associated`, 2000);
     });
-    socket.subscribe("srp", "change.lossmails", (data) => {
-      data.forEach((killmail) => {
-        this.lossmails_all.set(killmail.id, killmail);
-      })
-    });
-    socket.subscribe("srp", "lossmails.all", (data) => {
-      data.forEach((killmail) => {
-        this.lossmails_all.set(killmail.id, killmail);
-      });
+    socket.subscribe("srp", "change.lossmails", lossmail_adjust);
+    socket.subscribe("srp", "lossmails.all", lossmail_adjust);
+    socket.subscribe("srp", "change.rules", (data) => {
+      for (const rule of Object.keys(data)){
+        if (rule != "id" && rule != "group"){
+          this.srp_rules[rule] = new Map(data[rule]);
+        }
+      }
+      this.srp_types = Object.keys(this.srp_rules);
+      if (this.references.srp_select) {
+        this.references.srp_select.refresh();
+      }
     });
   }
 

@@ -1,8 +1,10 @@
 <template>
   <require from="materialize-css/css/materialize.css"></require>
   <require from="./resources/css/default.css"></require>
+  <md-colors md-primary-color="blue" md-accent-color="green"></md-colors>
   <md-navbar>
     <a route-href="route: eve-sso" class="brand-logo" css.bind="{paddingRight: '15px', paddingLeft: '15px'}"><span>CorpWeb</span></a>
+    <a md-sidenav-collapse="ref.bind: sideNavLeft" class="left hide-on-large-only" style="cursor: pointer; padding: 0 10px;"><i class="material-icons">menu</i></a>
     <ul class="hide-on-med-and-down right">
       <li repeat.for="route of router.navigation" show.bind="nav.bar[route.title]" class="${route.isActive ? 'active' : ''}">
         <a href="${route.href}">${route.title}</a>
@@ -29,6 +31,34 @@
         <a href="${socket.state == 'Connected' ? site_config.backend.uri + site_config.backend.eve_sso_redirect : '#' }" md-button="disabled.bind: socket.state !== 'Connected'">Log In</a>
       </li>
     </ul>
+    <md-sidenav md-width="320" view-model.ref="sideNavLeft" md-edge="left" md-close-on-click="true">
+      <ul>
+        <li repeat.for="route of router.navigation" show.bind="nav.bar[route.title]" class="${route.isActive ? 'active' : ''}">
+          <a href="${route.href}">${route.title}</a>
+        </li>
+        <li css.bind="{paddingRight: '15px', paddingLeft: '15px'}">Status: ${socket.state}</li>
+        <li>
+          <a show.bind="socket.state !== 'Reconnecting'" md-button click.trigger="connection()">
+            ${socket.action}
+          </a>
+          <a show.bind="socket.state === 'Reconnecting'" md-button="disabled: true">
+            ${socket.action}
+          </a>
+        </li>
+        <li show.bind="socket.info && socket.info.user_id === null">
+          <a md-button="disabled: true">Logging In...</a>
+        </li>
+        <li show.bind="socket.info && socket.info.user_id != null && socket.info.character_name && socket.state == 'Connected'">
+          <a md-sidenav-collapse="ref.bind: sideNavRight" md-button>${socket.info.character_name}</a>
+        </li>
+        <li show.bind="socket.info && socket.info.user_id != null && socket.info.character_name && socket.state != 'Connected'">
+          <a md-button="disabled: true">${socket.info.character_name}</a>
+        </li>
+        <li show.bind="!(socket.info && socket.info.character_name) && socket.info.user_id !== null">
+          <a href="${socket.state == 'Connected' ? site_config.backend.uri + site_config.backend.eve_sso_redirect : '#' }" md-button="disabled.bind: socket.state !== 'Connected'">Log In</a>
+        </li>
+      </ul>
+    </md-sidenav>
   </md-navbar>
   <md-sidenav show.bind='socket.info.character_id' md-width="320" view-model.ref="sideNavRight" md-edge="right" md-close-on-click="true">
     <img  css.bind='{padding: "32px"}' src="https://imageserver.eveonline.com/Character/${socket.info.character_id}_256.jpg" alt="Character Portrait">
@@ -47,7 +77,7 @@
       <li><a click.trigger="associated()" md-modal-trigger href="#list-associated">List Associated Characters</a></li>
       <li show.bind="!changefeeds.associating"><a md-modal-trigger href="#confirm-association">Associate new character</a></li>
       <li css.bind='{padding: "32px"}' show.bind="changefeeds.associating">
-        <md-progress md-type="circular" md-color="flashing"></md-progress>
+        <md-progress md-type="circular" md-color="flashing" md-size="small"></md-progress>
         <p>Association in progress...</p>
       </li>
       <li><a click.trigger="logout()">Log Out</a></li>

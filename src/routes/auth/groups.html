@@ -1,0 +1,66 @@
+<template>
+  <div class="container">
+    <div class="row">
+      <div class="col s6">
+        <md-card md-title="Groups">
+          <div class="row">
+            <select md-select="label: Group" value.two-way="current_group" change.delegate="select_group()" md-select.ref="group_select">
+              <option model.bind="null">[Create New]</option>
+              <option repeat.for="group of groups" model.bind="group">${group.id}</option>
+            </select>
+          </div>
+          <div class="row">
+            <md-input md-label="Name" md-value.bind="id" md-disabled.bind="current_group"></md-input>
+            <md-input md-label="Priority (Lower overwrites higher)" md-value.bind="priority"></md-input>
+          </div>
+          <div class="row" repeat.for="permission of static_permissions">
+            <label>${permission}</label>
+            <md-radio md-name.bind="permission" md-value.bind="'null'" md-checked.bind="permissions[permission]">Null</md-radio>
+            <md-radio md-name.bind="permission" md-value.bind="'true'" md-checked.bind="permissions[permission]">True</md-radio>
+            <md-radio md-name.bind="permission" md-value.bind="'false'" md-checked.bind="permissions[permission]">False</md-radio>
+          </div>
+          <div class="row">
+            <button md-button click.trigger="edit(true)" show.bind="!current_group">Create</button>
+            <button md-button click.trigger="edit()" show.bind="current_group">Edit</button>
+            <button md-button click.trigger="remove()" show.bind="current_group">Remove</button>
+          </div>
+        </md-card>
+      </div>
+      <div class="col s6">
+        <md-card md-title="Users in ${id || 'Unnamed' }">
+          <div class="row">
+            <md-collection view-model.ref="group_user_list">
+              <md-collection-item repeat.for="user of group_users" class="avatar ${ group_user_selector.isSelected ? 'selected' : '' }">
+                <md-collection-selector view-model.ref="group_user_selector" item.bind="user" md-on-selection-changed.delegate="group_user_selected()">
+                  <img src="https://imageserver.eveonline.com/Character/${user.character_id}_128.jpg" alt="user.character_name" class="circle md-collection-selector__hover">
+                </md-collection-selector>
+                <span class="accent-text title">${user.character_name}</span>
+              </md-collection-item>
+            </md-collection>
+          </div>
+          <div class="row">
+            <button md-button click.trigger="user_remove()" show.bind="current_group">Remove selected users</button>
+            <button md-button="disabled: true;" show.bind="!current_group">Remove selected users</button>
+          </div>
+          <div class="row">
+            <md-input md-label="Search and Add By Name" md-value.bind="user_autocomplete" input.delegate="user_find() & throttle"></md-input>
+          </div>
+          <div class="row">
+            <md-collection view-model.ref="user_list">
+              <md-collection-item repeat.for="user of user_results" class="avatar ${ user_selector.isSelected ? 'selected' : '' }">
+                <md-collection-selector view-model.ref="user_selector" item.bind="user" md-on-selection-changed.delegate="user_selected()">
+                  <img src="https://imageserver.eveonline.com/Character/${user.character_id}_128.jpg" alt="user.character_name" class="circle md-collection-selector__hover">
+                </md-collection-selector>
+                <span class="accent-text title">${user.character_name}</span>
+              </md-collection-item>
+            </md-collection>
+          </div>
+          <div class="row">
+            <button md-button click.trigger="user_add()" show.bind="current_group">Add selected users</button>
+            <button md-button="disabled: true;" show.bind="!current_group">Add selected users</button>
+          </div>
+        </md-card>
+      </div>
+    </div>
+  </div>
+</template>

@@ -40,6 +40,7 @@ export class SRP {
 
   attached() {
     this.changefeeds.references.srp_select = this.type_select;
+    this.changefeeds.references.srp_pay_to_select = this.pay_to_select;
 
     this.socket.subscribe("srp", "lossmails.get", (data) => {
       data.map(this.recalculate.bind(this));
@@ -50,12 +51,18 @@ export class SRP {
       }
       this.personal_prices();
     });
+    this.socket.subscribe("srp", "lossmails.submit", (data) => {
+      this.toast.show("Send Success",5000);
+      this.refresh();
+    });
     this.socket.send("srp", "lossmails.all", null);
+    this.socket.send("auth", "user.characters", this.socket.info.user_id);  // Force check associations
     this.refresh();
   }
 
   detached() {
     this.socket.unsubscribe('srp', 'lossmails.get');
+    this.socket.unsubscribe('srp', 'lossmails.submit');
   }
 
   personal_prices() {
@@ -104,8 +111,7 @@ export class SRP {
       this.aar = '';
       this.srp_note = '';
       this.srp_type = "standard";
-      this.refresh();
-      this.toast.show("Sent",5000);
+      this.updating_losses = true;
       $(this.submit_modal).closeModal();
     });
   }

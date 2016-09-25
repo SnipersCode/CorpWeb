@@ -38,6 +38,9 @@ export default class Changefeeds {
 
     socket.subscribe("auth", "user.characters", (data) => {
       this.associated_characters = data;
+      if (this.references.srp_pay_to_select) {
+        this.references.srp_pay_to_select.refresh();
+      }
     });
     socket.subscribe("auth", "change.session", (data) => {
       this.logging_in = false;

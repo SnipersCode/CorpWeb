@@ -48,7 +48,7 @@
                   ZKillboard Link
                 </a> || <a href="${lossmail.aar | sanitizeHTML}" target="_blank"> AAR Link </a>
                 <br/>
-                Payout: <b>${lossmail.srp_total | iskFinalFormat}</b> ${lossmail.overridden ? '[Overridden]' : ''}
+                Type: <b>${lossmail.srp_type}</b>, Payout: <b>${lossmail.srp_total | iskFinalFormat}</b> ${lossmail.overridden ? '[Overridden]' : ''}
                 <br/>
                 Pay to: ${lossmail.reimburse_to}
                 <br />
@@ -72,7 +72,7 @@
                 <br />
                 <a href="https://zkillboard.com/kill/${lossmail.id}" target="_blank">ZKillboard Link</a> || <a href="${lossmail.aar | sanitizeHTML}" target="_blank"> AAR Link </a>
                 <br />
-                Payout: <b>${lossmail.srp_total | iskFinalFormat}</b> ${lossmail.overridden ? '[Overridden]' : ''}
+                Type: <b>${lossmail.srp_type}</b>, Payout: <b>${lossmail.srp_total | iskFinalFormat}</b> ${lossmail.overridden ? '[Overridden]' : ''}
                 <br />
                 Pay to: ${lossmail.reimburse_to}
                 <br />
@@ -118,8 +118,8 @@
             Total: ${personal_srp_total | iskFinalFormat}
             <br/>
             <br/>
-            <a md-button='disabled:true' show.bind="personal_selected.length === 0">Select</a>
-            <a md-button md-modal-trigger href="#submit" show.bind="personal_selected.length !== 0">Select</a>
+            <a md-button='disabled:true' show.bind="personal_selected.length === 0 || updating_losses">Select</a>
+            <a md-button md-modal-trigger href="#submit" show.bind="personal_selected.length !== 0 && !updating_losses">Select</a>
           </md-card>
         </div>
       </div>
@@ -162,7 +162,7 @@
           </md-radio>
         </div>
         <div class="row">
-          <select md-select="label: Pay To" value.bind="reimburse_to">
+          <select md-select="label: Pay To" value.bind="reimburse_to" md-select.ref="pay_to_select">
             <option repeat.for='character of changefeeds.associated_characters'
                     value.bind="character.character_name">${character.character_name}</option>
           </select>

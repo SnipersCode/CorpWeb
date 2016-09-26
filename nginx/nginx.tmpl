@@ -63,7 +63,12 @@ server {
 	access_log /var/log/nginx/access.log vhost;
   root /data/www;
 
-  location ~ ^.+\..+$ {
+  {{ if (exists "/etc/nginx/vhost.d/default") }}
+  include /etc/nginx/vhost.d/default;
+  {{ end }}
+
+  # Location for uris that do not have a period in the route, but end with a extension
+  location ~ ^[^.]+/[^\./]+\.[^\./]+$ {
     try_files $uri =404;
   }
 
@@ -93,7 +98,12 @@ server {
 
   root /data/www;
 
-  location ~ ^.+\..+$ {
+  {{ if (exists "/etc/nginx/vhost.d/default") }}
+  include /etc/nginx/vhost.d/default;
+  {{ end }}
+
+  # Location for uris that do not have a period in the route, but end with a extension
+  location ~ ^[^.]+/[^\./]+\.[^\./]+$ {
     try_files $uri =404;
   }
 

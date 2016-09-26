@@ -85,6 +85,7 @@
         "prepend": [
           "node_modules/babel-polyfill/dist/polyfill.js",
           "node_modules/bluebird/js/browser/bluebird.core.js",
+          "whatwg-fetch",
           "scripts/require.js"
         ],
         "dependencies": [
@@ -204,7 +205,6 @@
             "path": "../external_modules/primus",
             "main": "primus"
           },
-          "whatwg-fetch",
           "aurelia-fetch-client",
           "moment",
           "numeral"

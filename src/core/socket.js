@@ -39,10 +39,8 @@ export default class Socket {
       this.latest_data = data;
       if (data.error == "auth.session" || data.error == "auth.jwt"){
         this.update_jwt(null);
-        console.log(data);
       } else if (data.error) {
         this.update_jwt(null);
-        console.log(data);
       } else {
         // Update JWT on each message
         this.update_jwt(data.jwt);
@@ -60,6 +58,7 @@ export default class Socket {
       this.state = "Reconnecting";
       this.action = "Reconnecting...";
       this.reconnect = {seconds: opts.scheduled, attempt: opts.attempt, max: opts.retries};
+      console.log(`Connecting in ${opts.scheduled} second(s). Attempt ${opts.attempt}/${opts.retries}`);
     }).on('reconnected', () => {
       this.initialize();
       this.state = "Connected";

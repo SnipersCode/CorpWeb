@@ -40,7 +40,6 @@ export class Groups {
       this.user_results = users;
     });
 
-    console.log('attach');
     this.socket.send("auth", "groups.get", null);
   }
 

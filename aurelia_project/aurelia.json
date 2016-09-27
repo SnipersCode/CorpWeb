@@ -85,7 +85,7 @@
         "prepend": [
           "node_modules/babel-polyfill/dist/polyfill.js",
           "node_modules/bluebird/js/browser/bluebird.core.js",
-          "whatwg-fetch",
+          "node_modules/whatwg-fetch/fetch.js",
           "scripts/require.js"
         ],
         "dependencies": [

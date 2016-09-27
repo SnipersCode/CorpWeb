@@ -1,5 +1,4 @@
 import environment from './environment';
-import 'whatwg-fetch';
 
 //Configure Bluebird Promises.
 //Note: You may want to use environment-specific configuration.

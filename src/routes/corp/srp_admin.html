@@ -1,0 +1,75 @@
+<template>
+  <div class="container">
+    <div class="row">
+      <div class="col m8">
+        <div class="row">
+          <md-card md-title="Group Selection">
+            <label>Choose a rule</label>
+            <select md-select value.two-way="current_rule" change.delegate="select_rule()" md-select.ref="srp_admin_select">
+              <option model.bind="null">[Create New]</option>
+              <option repeat.for="rule of changefeeds.srp_types" model.bind="changefeeds.srp_rules[rule]">${rule}</option>
+            </select>
+            <md-input md-label="Group Name" md-value.bind="name" md-disabled.bind="!!current_rule"></md-input>
+            <div class="row">
+              <button md-button click.delegate="send()" show.bind="name">Save</button>
+              <button md-button="disabled: true" show.bind="!name">Save</button>
+              <button md-button click.delegate="rule_delete(current_rule.id)" show.bind="!!current_rule">Delete</button>
+            </div>
+          </md-card>
+        </div>
+        <div class="row">
+          <div class="col m6">
+            <md-card md-title="Group Rules">
+              <div class="row" repeat.for="[group_id, group_name] of group_map">
+                <md-input md-type="number" md-step="any" md-label="${group_id} ${group_name}" md-validate="true" md-validate-error="invalid number" md-value.bind="groups[group_id]"></md-input>
+              </div>
+            </md-card>
+          </div>
+          <div class="col m6">
+            <md-card md-title="Specific Ship Rules">
+              <div class="row" repeat.for="ship_info of ship_display">
+                <md-input md-type="number" md-step="any" md-label="${ship_info[0]} ${ship_info[1]}" md-validate="true" md-validate-error="invalid number" md-value.bind="ships[ship_info[0]]"></md-input>
+                <button md-button click.delegate="ship_delete(ship_info[0])">Delete ${ship_info[1]}</button>
+              </div>
+            </md-card>
+            <md-card md-title="Add Specific Ship Rules">
+              <div class="row">
+                <md-input md-label="Search and Add By Name" md-value.bind="ship_autocomplete" input.delegate="ship_find() & throttle"></md-input>
+              </div>
+              <div class="row">
+                <md-collection view-model.ref="ship_list">
+                  <md-collection-item repeat.for="ship of ship_results" class="avatar ${ ship_selector.isSelected ? 'selected' : '' }">
+                    <md-collection-selector view-model.ref="ship_selector" item.bind="ship" md-on-selection-changed.delegate="ship_select()">
+                      <img src="https://imageserver.eveonline.com/Type/${ship.id}_64.png" alt="${ship.name}" class="circle md-collection-selector__hover">
+                    </md-collection-selector>
+                    <span class="accent-text title">${ship.name}</span>
+                  </md-collection-item>
+                </md-collection>
+              </div>
+              <div class="row">
+                <button md-button click.delegate="ship_add()">Add</button>
+              </div>
+            </md-card>
+          </div>
+        </div>
+      </div>
+      <div class="col m4">
+        <md-card md-title="Global Flags">
+          <div class="row" repeat.for="flag of flags">
+            <md-input md-label="Flag Name" md-value.bind="flag"></md-input>
+            <button md-button click.delegate="flag_delete(flag)">Delete</button>
+          </div>
+          <div class="row">
+            <button md-button click.delegate="send(true)">Save Flags Only</button>
+          </div>
+        </md-card>
+        <md-card md-title="Add Global Flag">
+          <div class="row">
+            <md-input md-label="New Flag" md-value.bind="new_flag"></md-input>
+            <button md-button click.delegate="flag_add()">Add</button>
+          </div>
+        </md-card>
+      </div>
+    </div>
+  </div>
+</template>

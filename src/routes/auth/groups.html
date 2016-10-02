@@ -49,7 +49,7 @@
             <md-collection view-model.ref="user_list">
               <md-collection-item repeat.for="user of user_results" class="avatar ${ user_selector.isSelected ? 'selected' : '' }">
                 <md-collection-selector view-model.ref="user_selector" item.bind="user" md-on-selection-changed.delegate="user_selected()">
-                  <img src="https://imageserver.eveonline.com/Character/${user.character_id}_128.jpg" alt="user.character_name" class="circle md-collection-selector__hover">
+                  <img src="https://imageserver.eveonline.com/Character/${user.character_id}_128.jpg" alt="${user.character_name}" class="circle md-collection-selector__hover">
                 </md-collection-selector>
                 <span class="accent-text title">${user.character_name}</span>
               </md-collection-item>

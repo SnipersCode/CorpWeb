@@ -8,11 +8,17 @@ export default class Changefeeds {
 
     // Fake settings
     this.srp_rules = {
-      standard: new Map([
-        [null, 0]    // Default
-      ])
+      standard: {
+        groups: new Map([
+          [null, 0]    // Default
+        ]),
+        ships: new Map([
+          [null, 0]
+        ])
+      }
     };
     this.srp_types = [];
+    this.srp_flags = [];
 
     // External references. There's probably a better way to implement this
     this.references = {};
@@ -54,13 +60,24 @@ export default class Changefeeds {
     socket.subscribe("srp", "lossmails.all", lossmail_adjust);
     socket.subscribe("srp", "change.rules", (data) => {
       for (const rule of Object.keys(data)){
-        if (rule != "id" && rule != "group"){
-          this.srp_rules[rule] = new Map(data[rule]);
+        if (rule != "id" && rule != "group" && rule != "flags"){
+          this.srp_rules[rule] = {
+            id: rule,
+            groups: new Map(data[rule].groups),
+            ships: new Map(data[rule].ships)
+          };
+        } else if (rule == "flags") {
+          this.srp_flags = data[rule];
         }
       }
       this.srp_types = Object.keys(this.srp_rules);
+
+      // Select Refreshes (References from other pages)
       if (this.references.srp_select) {
-        this.references.srp_select.refresh();
+        this.references.srp_select.refresh();  // srp.js
+      }
+      if (this.references.srp_admin_select) {
+        this.references.srp_admin_select.refresh();  //srp_admin.js
       }
     });
   }

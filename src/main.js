@@ -1,5 +1,10 @@
 import environment from './environment';
 
+// Force tracing order
+import $ from 'jquery';
+import 'materialize-css';
+import 'aurelia-materialize-bridge';
+
 //Configure Bluebird Promises.
 //Note: You may want to use environment-specific configuration.
 Promise.config({

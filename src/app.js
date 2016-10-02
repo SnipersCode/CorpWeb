@@ -27,6 +27,7 @@ export class App {
   configureRouter(config, router){
     config.title = 'CorpWeb';
     config.options.pushState = true;
+    config.options.root = '/';
     config.addAuthorizeStep(AuthorizeStep);
     config.map(this.nav.routes);
 

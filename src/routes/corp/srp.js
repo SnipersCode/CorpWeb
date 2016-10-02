@@ -1,12 +1,10 @@
 import {inject, NewInstance} from 'aurelia-framework';
 import {ValidationController, ValidationRules} from 'aurelia-validation';
 import {MdToastService, MaterializeFormValidationRenderer} from 'aurelia-materialize-bridge';
-import numeral from 'numeral';
 import {url_regex} from '../../core/snippits';
 
 import Socket from '../../core/socket';
 import Changefeeds from '../../core/changefeeds';
-import config from '../../config';
 
 @inject(Socket, Changefeeds, MdToastService, NewInstance.of(ValidationController))
 export class SRP {
@@ -22,6 +20,7 @@ export class SRP {
     this.aar = '';
     this.srp_note = '';
     this.reimburse_to = this.socket.info.character_name;
+    this.srp_flags = {};
 
     this.lossmails = [];
     this.personal_base_price = 0;
@@ -30,6 +29,7 @@ export class SRP {
     this.edit_override = false;
     this.edit_price = 0;
     this.edit_type = 'override';
+    this.edit_flags = {};
 
     this.pending_only = true;
 
@@ -78,19 +78,20 @@ export class SRP {
     }
   }
 
-  multiplier(srp_type, ship_group_id) {
-    let multiplier = this.changefeeds.srp_rules[srp_type].get(ship_group_id);
-    if (!multiplier || !ship_group_id) { // No specific rule or no lower ship group
-      multiplier = this.changefeeds.srp_rules[srp_type].get(null);
-      if (!multiplier) {  // No default
-        multiplier = 0;
-      }
-    }
+  multiplier(srp_type, ship_group_id, ship_id) {
+    const group_rules = this.changefeeds.srp_rules[srp_type].groups;
+    const specific_rules = this.changefeeds.srp_rules[srp_type].ships;
+
+    let multiplier = specific_rules.get(ship_id); // Check specific rules
+    multiplier = !(multiplier && ship_id) ? group_rules.get(ship_group_id) : multiplier; // Check group rules
+    multiplier = !(multiplier && ship_group_id) ? group_rules.get(null) : multiplier; // Check default
+    multiplier = !(multiplier) ? 0 : multiplier; // 0 if no default
+
     return multiplier;
   }
 
   recalculate(lossmail) {
-    lossmail.multiplier = this.multiplier(this.srp_type, lossmail.lower_ship_group_id);
+    lossmail.multiplier = this.multiplier(this.srp_type, lossmail.lower_ship_group_id, lossmail.ship_item_id);
     lossmail.srp_total = lossmail.srp_base_price * lossmail.multiplier;
     return lossmail;
   }
@@ -106,6 +107,12 @@ export class SRP {
         lossmail.aar = this.aar;
         lossmail.note = this.srp_note;
         lossmail.srp_type = this.srp_type;
+        lossmail.srp_flags = [];
+        for (const flag of Object.keys(this.srp_flags)) {
+          if (this.srp_flags[flag]){
+            lossmail.srp_flags.push(flag);
+          }
+        }
       });
       this.socket.send("srp", "lossmails.submit", to_send);
       this.aar = '';
@@ -120,6 +127,11 @@ export class SRP {
     this.updating_losses = true;
     this.socket.send("srp", "rules.get");
     this.socket.send("srp", "lossmails.get", null);
+    this.socket.send("srp", "lossmails.all", null);
+  }
+
+  personal_select() {
+    this.personal_prices();
   }
 
   edit_select(lossmail) {
@@ -128,6 +140,15 @@ export class SRP {
     this.edit_note = lossmail.note;
     this.edit_override = !!lossmail.overridden;
     this.edit_multiplier = 'N/A';
+
+    this.edit_flags = {};
+    for (const flag of Object.keys(this.changefeeds.srp_flags)){
+      this.edit_flags[flag] = false;
+    }
+    for (const flag of lossmail.srp_flags){
+      this.edit_flags[flag] = true;
+    }
+
     if (!this.edit_override) {
       this.edit_type = lossmail.srp_type;
     } else {
@@ -139,7 +160,8 @@ export class SRP {
   edit_prices(override) {
     this.edit_override = override;
     if(!override){
-      this.edit_multiplier = this.multiplier(this.edit_type, this.edit_lossmail.lower_ship_group_id);
+      this.edit_multiplier = this.multiplier(this.edit_type,
+        this.edit_lossmail.lower_ship_group_id, this.edit_lossmail.ship_item_id);
       this.edit_price = this.edit_lossmail.srp_base_price * this.edit_multiplier;
     } else {
       this.edit_multiplier = 'N/A';
@@ -148,13 +170,20 @@ export class SRP {
   }
 
   edit_submit() {
+    const flags = [];
+    for (const flag of Object.keys(this.edit_flags)){
+      if(this.edit_flags[flag]){
+        flags.push(flag);
+      }
+    }
     this.socket.send("srp", "lossmails.edit", {
       id: this.edit_lossmail.id,
       aar: this.edit_aar,
       note: this.edit_note,
       overridden: this.edit_override,
       srp_total: this.edit_price,
-      srp_type: this.edit_override ? 'override' : this.edit_type
+      srp_type: this.edit_override ? 'override' : this.edit_type,
+      srp_flags: flags
     })
   }
 

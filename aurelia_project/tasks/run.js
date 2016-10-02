@@ -1,6 +1,6 @@
 import gulp from 'gulp';
 import browserSync from 'browser-sync'
-import historyApiFallback from 'connect-history-api-fallback/lib';;
+import historyApiFallback from 'connect-history-api-fallback/lib';
 import project from '../aurelia.json';
 import build from './build';
 import {CLIOptions} from 'aurelia-cli';
@@ -48,7 +48,7 @@ let watch = function() {
   gulp.watch(project.transpiler.source, refresh).on('change', onChange);
   gulp.watch(project.markupProcessor.source, refresh).on('change', onChange);
   gulp.watch(project.cssProcessor.source, refresh).on('change', onChange)
-}
+};
 
 let run;
 

@@ -89,6 +89,11 @@
           "scripts/require.js"
         ],
         "dependencies": [
+          {
+            "name": "jquery",
+            "path": "../node_modules/jquery/dist",
+            "main": "jquery.min"
+          },
           "aurelia-binding",
           "aurelia-bootstrapper",
           "aurelia-dependency-injection",
@@ -131,9 +136,22 @@
             "env": "dev"
           },
           {
-            "name": "jquery",
-            "path": "../node_modules/jquery/dist",
-            "main": "jquery.min"
+            "name": "jwt-decode",
+            "path": "../node_modules/jwt-decode/lib",
+            "main": "index"
+          },
+          {
+            "name": "primus",
+            "path": "../external_modules/primus",
+            "main": "primus"
+          },
+          "aurelia-fetch-client",
+          "moment",
+          "numeral",
+          {
+            "name": "aurelia-validation",
+            "path": "../node_modules/aurelia-validation/dist/amd",
+            "main": "aurelia-validation"
           },
           {
             "name": "materialize-css",
@@ -189,25 +207,7 @@
               "switch/switch.html",
               "well/md-well.html"
             ]
-          },
-          {
-            "name": "aurelia-validation",
-            "path": "../node_modules/aurelia-validation/dist/amd",
-            "main": "aurelia-validation"
-          },
-          {
-            "name": "jwt-decode",
-            "path": "../node_modules/jwt-decode/lib",
-            "main": "index"
-          },
-          {
-            "name": "primus",
-            "path": "../external_modules/primus",
-            "main": "primus"
-          },
-          "aurelia-fetch-client",
-          "moment",
-          "numeral"
+          }
         ]
       }
     ]

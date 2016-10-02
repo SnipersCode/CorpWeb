@@ -37,7 +37,7 @@
         <div id="tab2" class="z-depth-1">
           <md-collection>
             <md-collection-item repeat.for="[lossmail_id, lossmail] of changefeeds.lossmails_all"
-                                class="accent-text avatar" show.bind="lossmail.srp_submitter_id == $parent.socket.info.user_id">
+                                class="accent-text avatar" show.bind="lossmail.srp_submitter_id == $parent.socket.info.user_id && (!lossmail.srp_status || lossmail.srp_status == 'Submitted' || !pending_only)">
               <img src="https://imageserver.eveonline.com/Render/${lossmail.ship_item_id}_64.png"
                    alt="${lossmail.ship_name}" class="circle">
               <span class="accent-text title">${lossmail.ship_name} @ ${lossmail.solar_system_name}</span>
@@ -50,6 +50,8 @@
                 <br/>
                 Type: <b>${lossmail.srp_type}</b>, Payout: <b>${lossmail.srp_total | iskFinalFormat}</b> ${lossmail.overridden ? '[Overridden]' : ''}
                 <br/>
+                Flags: ${lossmail.srp_flags.join(', ')}
+                <br />
                 Pay to: ${lossmail.reimburse_to}
                 <br />
                 Status: ${lossmail.srp_status || 'Submitted'}
@@ -73,6 +75,8 @@
                 <a href="https://zkillboard.com/kill/${lossmail.id}" target="_blank">ZKillboard Link</a> || <a href="${lossmail.aar | sanitizeHTML}" target="_blank"> AAR Link </a>
                 <br />
                 Type: <b>${lossmail.srp_type}</b>, Payout: <b>${lossmail.srp_total | iskFinalFormat}</b> ${lossmail.overridden ? '[Overridden]' : ''}
+                <br />
+                Flags: ${lossmail.srp_flags.join(', ')}
                 <br />
                 Pay to: ${lossmail.reimburse_to}
                 <br />
@@ -101,6 +105,9 @@
             </md-collection>
           </md-card>
           <md-card>
+            <div class="row" show.bind="socket.info.permissions.get('srp_approve') || socket.info.permissions.get('super_admin')">
+              <a md-button route-href="route: srp-admin">Admin Page</a>
+            </div>
             <div class="row">
               <a md-button md-modal-trigger href="#help">Help</a>
             </div>
@@ -119,7 +126,7 @@
             <br/>
             <br/>
             <a md-button='disabled:true' show.bind="personal_selected.length === 0 || updating_losses">Select</a>
-            <a md-button md-modal-trigger href="#submit" show.bind="personal_selected.length !== 0 && !updating_losses">Select</a>
+            <a md-button md-modal-trigger href="#submit" show.bind="personal_selected.length !== 0 && !updating_losses" click.trigger="personal_select()">Select</a>
           </md-card>
         </div>
       </div>
@@ -160,6 +167,10 @@
           <md-radio repeat.for='type of changefeeds.srp_types' md-name="srp-type" md-value.bind="type"
                     md-checked.bind="$parent.srp_type" change.delegate="personal_prices()">${type}
           </md-radio>
+        </div>
+        <div class="row">
+          <label>SRP Flags</label>
+          <md-switch md-label-on="${flag}" md-label-off="Not ${flag}" repeat.for="flag of changefeeds.srp_flags" md-checked.bind="$parent.srp_flags[flag]">${flag}</md-switch>
         </div>
         <div class="row">
           <select md-select="label: Pay To" value.bind="reimburse_to" md-select.ref="pay_to_select">
@@ -229,6 +240,10 @@
         <md-radio md-name="edit-type" md-value="override"
                   md-checked.bind="edit_type" change.delegate="edit_prices(true)">override
         </md-radio>
+      </div>
+      <div class="row">
+        <label>SRP Flags</label>
+        <md-switch md-label-on="${flag}" md-label-off="Not ${flag}" repeat.for="flag of changefeeds.srp_flags" md-checked.bind="$parent.edit_flags[flag]">${flag}</md-switch>
       </div>
       <div class="row">
         <md-input md-label="Current Price" md-value.bind="edit_price" md-disabled.bind="!edit_override"></md-input>

@@ -5,6 +5,7 @@ import {url_regex} from '../../core/snippits';
 
 import Socket from '../../core/socket';
 import Changefeeds from '../../core/changefeeds';
+import {price_round} from '../../core/statics';
 
 @inject(Socket, Changefeeds, MdToastService, NewInstance.of(ValidationController))
 export class SRP {
@@ -55,8 +56,12 @@ export class SRP {
       this.toast.show("Send Success",5000);
       this.refresh();
     });
+    this.socket.subscribe("srp", "lossmails.stats", (data) => {
+      this.stats = data;
+    });
     this.socket.send("srp", "lossmails.all", null);
     this.socket.send("auth", "user.characters", this.socket.info.user_id);  // Force check associations
+    this.socket.send("srp", "lossmails.stats", null);
     this.refresh();
   }
 
@@ -91,8 +96,14 @@ export class SRP {
   }
 
   recalculate(lossmail) {
-    lossmail.multiplier = this.multiplier(this.srp_type, lossmail.lower_ship_group_id, lossmail.ship_item_id);
-    lossmail.srp_total = lossmail.srp_base_price * lossmail.multiplier;
+    const multiplier_result = this.multiplier(this.srp_type, lossmail.lower_ship_group_id, lossmail.ship_item_id);
+    if (multiplier_result >= 1000000){
+      lossmail.multiplier = 0;
+      lossmail.srp_total = multiplier_result;
+    } else {
+      lossmail.multiplier = multiplier_result;
+      lossmail.srp_total = lossmail.srp_base_price * multiplier_result;
+    }
     return lossmail;
   }
 
@@ -160,9 +171,15 @@ export class SRP {
   edit_prices(override) {
     this.edit_override = override;
     if(!override){
-      this.edit_multiplier = this.multiplier(this.edit_type,
+      const multiplier_result = this.multiplier(this.edit_type,
         this.edit_lossmail.lower_ship_group_id, this.edit_lossmail.ship_item_id);
-      this.edit_price = this.edit_lossmail.srp_base_price * this.edit_multiplier;
+      if (multiplier_result >= 1000000){
+        this.edit_multiplier = 0;
+        this.edit_price = multiplier_result;
+      } else {
+        this.edit_multiplier = multiplier_result;
+        this.edit_price = this.edit_lossmail.srp_base_price * multiplier_result;
+      }
     } else {
       this.edit_multiplier = 'N/A';
       this.edit_price = this.edit_lossmail.srp_total;
@@ -188,10 +205,14 @@ export class SRP {
   }
 
   edit_status(status, lossmail) {
-    this.socket.send("srp", "lossmails.edit", {
-      id: lossmail.id,
-      srp_status: status
-    })
+    const to_send = {id: lossmail.id, srp_status: status};
+    if (status == "Paid") {
+      to_send.srp_paid = price_round(lossmail.srp_total, false);
+      console.log(to_send.srp_paid);
+    } else {
+      to_send.srp_paid = 0;
+    }
+    this.socket.send("srp", "lossmails.edit", to_send);
   }
 
   toggle_pending() {

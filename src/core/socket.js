@@ -1,4 +1,5 @@
 import {inject} from 'aurelia-framework';
+import {Router} from 'aurelia-router';
 import Primus from 'primus';
 import jwt_decode from 'jwt-decode';
 
@@ -6,13 +7,14 @@ import config from '../config';
 import Nav from '../core/nav';
 import Changefeeds from 'core/changefeeds';
 
-@inject(Nav, Changefeeds)
+@inject(Nav, Changefeeds, Router)
 export default class Socket {
 
-  constructor(Nav, Changefeeds) {
+  constructor(Nav, Changefeeds, Router) {
 
     this.nav = Nav;
     this.nav.set_socket(this);
+    this.router = Router;
 
     this.info = null;
     this.update_jwt(localStorage.getItem('CorpWeb:JWT'));
@@ -39,6 +41,7 @@ export default class Socket {
       this.latest_data = data;
       if (data.error == "auth.session" || data.error == "auth.jwt"){
         this.update_jwt(null);
+        this.router.navigateToRoute('home');
       } else if (data.error) {
         this.update_jwt(null);
       } else {
@@ -133,7 +136,7 @@ export default class Socket {
   subscribe(module, endpoint, callback) {
     this.external_listeners[module + endpoint] = (data) => {
       if (!module || (data.module == module && !endpoint) || (data.module == module && data.endpoint == endpoint)){
-        callback(data.payload);
+        callback(data.payload, data.target);
       }
     };
     this.connection.addListener('data', this.external_listeners[module + endpoint]);
@@ -141,6 +144,7 @@ export default class Socket {
 
   unsubscribe(module, endpoint) {
     this.connection.removeListener('data', this.external_listeners[module + endpoint]);
+    delete this.external_listeners[module + endpoint];
   }
 
   get direct_state() {

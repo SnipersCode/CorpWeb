@@ -62,5 +62,116 @@
         </md-card>
       </div>
     </div>
+    <div class="row">
+      <div class="col m6">
+        <md-card md-title="Affiliation Settings">
+          <md-collection>
+            <md-collection-item class="accent-text avatar">
+              <img src="https://imageserver.eveonline.com/Corporation/${affiliations.corporation.id}_64.png"
+                   alt="${affiliations.corporation.name}" class="circle">
+              <span class="title">Corporation</span>
+              <p>${affiliations.corporation.name}</p>
+            </md-collection-item>
+            <md-collection-item class="accent-text avatar">
+              <img src="https://imageserver.eveonline.com/Alliance/${affiliations.alliance.id}_64.png"
+                   alt="${affiliations.alliance.name}" class="circle">
+              <span class="title">Alliance</span>
+              <p>${affiliations.alliance.name}</p>
+            </md-collection-item>
+          </md-collection>
+          <h5>Edit</h5>
+          <div class="row">
+            <label>From Selected Contact Lists:</label><br />
+            <md-checkbox md-checked.bind="personal_contacts" md-filled-in="true">Personal</md-checkbox>
+            <md-checkbox md-checked.bind="corporate_contacts" md-filled-in="true">Corporate</md-checkbox>
+            <md-checkbox md-checked.bind="alliance_contacts" md-filled-in="true">Alliance</md-checkbox>
+          </div>
+          <div class="row">
+            <md-input md-label="Search By Name" md-value.bind="character_autocomplete" input.delegate="character_find() & throttle"></md-input>
+          </div>
+          <div class="row">
+            <md-collection>
+              <md-collection-item repeat.for="character of character_results" class="avatar">
+                <img src="https://imageserver.eveonline.com/Character/${character.character_id}_128.jpg" alt="${character.character_name}" class="circle">
+                <span class="accent-text title">${character.character_name}</span>
+                <p><a md-button md-modal-trigger href="#affiliation_modal" click.trigger="try_affiliation(character.id)">Use ${character.character_name}</a></p>
+              </md-collection-item>
+            </md-collection>
+          </div>
+        </md-card>
+      </div>
+      <div class="col m6">
+        <md-card md-title="Blues">
+          <table class="bordered centered">
+            <thead>
+            <tr>
+              <th>Icon</th>
+              <th>Name</th>
+              <th>Standing</th>
+              <th>Type</th>
+              <th>List</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr repeat.for="blue of affiliations.blues">
+              <td>
+                <img src="https://imageserver.eveonline.com/${blue.type_name}/${blue.id}_64.${blue.type_name == 'Character' ? 'jpg' : 'png'}" alt="${blue.name}">
+              </td>
+              <td>${blue.name}</td>
+              <td>${blue.standing}</td>
+              <td>${blue.type_name}</td>
+              <td>${blue.list}</td>
+            </tr>
+            </tbody>
+          </table>
+        </md-card>
+      </div>
+    </div>
+  </div>
+  <div id="affiliation_modal" class="modal">
+    <div class="modal-content">
+      <h4>Warning: <br />This will force log out all users</h4>
+      <h6>Note: This modal might not load right away. Please be patient.</h6>
+      <md-collection>
+        <md-collection-item class="accent-text avatar">
+          <img src="https://imageserver.eveonline.com/Corporation/${user_affiliations.corporation.id}_64.png"
+               alt="${user_affiliations.corporation.name}" class="circle">
+          <span class="title">Corporation</span>
+          <p>${user_affiliations.corporation.name}</p>
+        </md-collection-item>
+        <md-collection-item class="accent-text avatar">
+          <img src="https://imageserver.eveonline.com/Alliance/${user_affiliations.alliance.id}_64.png"
+               alt="${user_affiliations.alliance.name}" class="circle">
+          <span class="title">Alliance</span>
+          <p>${user_affiliations.alliance.name}</p>
+        </md-collection-item>
+      </md-collection>
+      <table class="bordered centered">
+        <thead>
+        <tr>
+          <th>Icon</th>
+          <th>Name</th>
+          <th>Standing</th>
+          <th>Type</th>
+          <th>List</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr repeat.for="blue of user_affiliations.blues">
+          <td>
+            <img src="https://imageserver.eveonline.com/${blue.type_name}/${blue.id}_64.${blue.type_name == 'Character' ? 'jpg' : 'png'}" alt="${blue.name}">
+          </td>
+          <td>${blue.name}</td>
+          <td>${blue.standing}</td>
+          <td>${blue.type_name}</td>
+          <td>${blue.list}</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="modal-footer">
+      <a md-button="flat: true;" class="modal-action modal-close" click.trigger="set_affiliation()">Confirm</a>
+      <a md-button="flat: true;" class="modal-action modal-close">Cancel</a>
+    </div>
   </div>
 </template>

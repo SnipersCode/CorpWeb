@@ -23,6 +23,15 @@ export class Groups {
     this.user_autocomplete = '';
     this.user_results = [];
 
+    this.alliance_contacts = false;
+    this.corporate_contacts = false;
+    this.personal_contacts = false;
+    this.affiliations = {};
+    this.character_autocomplete = '';
+    this.character_results = [];
+
+    this.user_affiliations = {};
+
   }
 
   attached() {
@@ -36,17 +45,32 @@ export class Groups {
       this.group_users = data;
     });
 
-    this.socket.subscribe("auth", "user.find", (users) => {
-      this.user_results = users;
+    this.socket.subscribe("auth", "user.find", (users, target) => {
+      if (target == 'groups'){
+        this.user_results = users;
+      } else {
+        this.character_results = users;
+      }
+    });
+
+    this.socket.subscribe("auth", "affiliations.get", (affiliations) => {
+      this.affiliations = affiliations;
+    });
+
+    this.socket.subscribe("auth", "user.affiliations", (affiliations) => {
+      this.user_affiliations = affiliations;
     });
 
     this.socket.send("auth", "groups.get", null);
+    this.socket.send("auth", "affiliations.get", null);
   }
 
   detached() {
     this.socket.unsubscribe('auth', 'groups.get');
     this.socket.unsubscribe('auth', 'groups.get_users');
     this.socket.unsubscribe('auth', 'user.find');
+    this.socket.unsubscribe('auth', 'affiliations.get');
+    this.socket.unsubscribe('auth', 'user.affiliations');
   }
 
   initialize_group() {
@@ -116,7 +140,20 @@ export class Groups {
   }
 
   user_find() {
-    this.socket.send("auth", "user.find", this.user_autocomplete);
+    this.socket.send("auth", "user.find", {
+      search: this.user_autocomplete,
+      target: 'groups',
+      all: false
+    });
+    return true;
+  }
+
+  character_find() {
+    this.socket.send("auth", "user.find", {
+      search: this.character_autocomplete,
+      target: 'affiliations',
+      all: true
+    });
     return true;
   }
 
@@ -148,5 +185,33 @@ export class Groups {
         })
       }
     }
+  }
+
+  affiliation_types(){
+    const types = [];
+    if (this.personal_contacts) {
+      types.push('personal');
+    }
+    if (this.corporate_contacts){
+      types.push('corporate');
+    }
+    if (this.alliance_contacts) {
+      types.push('alliance');
+    }
+    return types;
+  }
+
+  try_affiliation(user_id) {
+    this.affiliation_check = {
+      id: user_id,
+      types: this.affiliation_types()
+    };
+    this.socket.send("auth", "user.affiliations", this.affiliation_check);
+    return true;
+  }
+
+  set_affiliation() {
+    this.socket.send("auth", "affiliations.set", this.affiliation_check);
+    return true;
   }
 }
